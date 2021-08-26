@@ -5,6 +5,12 @@ module.exports = {
     extend: {
       minHeight: {
         "96": "384px",
+      },
+      height: {
+        "content": "fit-content"
+      },
+      minWidth: {
+        "64": "16rem",
       }
     },
   },
