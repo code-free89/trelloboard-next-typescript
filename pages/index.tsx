@@ -14,6 +14,7 @@ export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [columnTitle, setColumnTitle] = useState("");
+  const [searchTitle, setSearchTitle] = useState<string>("");
 
   useEffect(() => {
     setMounted(true);
@@ -94,6 +95,7 @@ export default function Home() {
   };
 
   const addBoard = () => {
+    if (columnTitle == "") return;
     const columnCount = columns.columnOrder.length + 1;
     const newColumnID = `column-${columnCount}`;
     setColumns(prevState => ({
@@ -115,6 +117,7 @@ export default function Home() {
   }
 
   const addCard = (index: number, cardTitle: string) => {
+    if (cardTitle == "") return;
     const columnID = `column-${index + 1}`;
     const taskID = Object.keys(columns.tasks).length + 1;
     setColumns(prevState => ({
@@ -143,6 +146,10 @@ export default function Home() {
     <div className="w-screen h-screen bg-blue-400 p-5">
       <div className="flex items-center justify-between px-2 pb-5">
         <div className="text-2xl text-white font-bold">Trello Board</div>
+        <div className="flex items-center space-x-4">
+          <div className="text-lg font-bold text-white">Search : </div>
+          <input type="text" className="p-1 rounded-sm border border-gray-300 focus:outline-none focus:ring focus:border-blue-300" onChange={(e) => { setSearchTitle(e.target.value) }} />
+        </div>
       </div>
       <div className="w-full flex overflow-x-auto">
         <DragDropContext onDragEnd={onDragEnd} >
@@ -152,7 +159,7 @@ export default function Home() {
                 {columns.columnOrder.map((id, index) => {
                   const column = columns.columns[id]
                   const tasks = column.taskIds.map(taskId => columns.tasks[taskId])
-                  return mounted ? <Column key={column.id} column={column} tasks={tasks} index={index} addCard={addCard} /> : <></>;
+                  return mounted ? <Column key={column.id} column={column} tasks={tasks} index={index} addCard={addCard} searchText={searchTitle} /> : <></>;
                 })}
                 {provided.placeholder}
               </div>

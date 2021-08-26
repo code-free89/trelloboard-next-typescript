@@ -9,13 +9,15 @@ type Props = {
   tasks: TaskType[];
   index: number;
   addCard: Function;
+  searchText: string;
 };
 
 const Column: React.FC<Props> = ({
   column,
   tasks,
   index,
-  addCard
+  addCard,
+  searchText
 }) => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [cardTitle, setCardTitle] = useState<string>("");
@@ -36,7 +38,7 @@ const Column: React.FC<Props> = ({
                 ref={provided.innerRef}
                 {...provided.droppableProps}
               >
-                {tasks.map((task, index) => {
+                {tasks.filter(item => item.content.toLowerCase().includes(searchText.toLowerCase())).map((task, index) => {
                   return <Task key={task.id} task={task} index={index} />
                 })}
                 {provided.placeholder}
