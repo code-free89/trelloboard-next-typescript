@@ -17,7 +17,7 @@ const Task: React.FC<Props> = ({
       {
         (provided, snapshot) => (
           <div
-            className="rounded bg-white text-gray-500 p-2 shadow-sm"
+            className="rounded bg-white text-gray-500 p-2 shadow-sm hover:bg-gray-50"
             {...provided.draggableProps}
             {...provided.dragHandleProps}
             ref={provided.innerRef}

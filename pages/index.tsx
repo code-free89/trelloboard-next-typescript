@@ -16,80 +16,98 @@ export default function Home() {
     setMounted(true);
   }, []);
 
-  const onDragEnd = (result: DropResult, provided: ResponderProvided) => {
-    const { destination, source, draggableId } = result;
-    if (!destination) return;
+  const onDragEnd = result => {
+    const { destination, source, draggableId, type } = result;
+    //If there is no destination
+    if (!destination) { return }
 
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    ) {
+    //If source and destination is the same
+    if (destination.droppableId === source.droppableId && destination.index === source.index) { return }
+
+    //If you're dragging columns
+    if (type === 'column')
+    {
+      const newColumnOrder = Array.from(columns.columnOrder);
+      newColumnOrder.splice(source.index, 1);
+      newColumnOrder.splice(destination.index, 0, draggableId);
+      const newState = {
+        ...columns,
+        columnOrder: newColumnOrder
+      }
+      setColumns(newState)
       return;
     }
 
+    //Anything below this happens if you're dragging tasks
     const start = columns.columns[source.droppableId];
     const finish = columns.columns[destination.droppableId];
 
-    if (start === finish) {
+    //If dropped inside the same column
+    if (start === finish)
+    {
       const newTaskIds = Array.from(start.taskIds);
       newTaskIds.splice(source.index, 1);
       newTaskIds.splice(destination.index, 0, draggableId);
-
       const newColumn = {
         ...start,
-        taskIds: newTaskIds,
-      };
-
-      const newColumns = {
+        taskIds: newTaskIds
+      }
+      const newState = {
         ...columns,
         columns: {
           ...columns.columns,
-          [newColumn.id]: newColumn,
-        },
-      };
-
-      setColumns(newColumns);
+          [newColumn.id]: newColumn
+        }
+      }
+      setColumns(newState)
       return;
     }
 
-    // Moving from one list to another
+    //If dropped in a different column
     const startTaskIds = Array.from(start.taskIds);
     startTaskIds.splice(source.index, 1);
     const newStart = {
       ...start,
-      taskIds: startTaskIds,
-    };
+      taskIds: startTaskIds
+    }
 
     const finishTaskIds = Array.from(finish.taskIds);
     finishTaskIds.splice(destination.index, 0, draggableId);
     const newFinish = {
       ...finish,
-      taskIds: finishTaskIds,
-    };
+      taskIds: finishTaskIds
+    }
 
-    const newColumns = {
+    const newState = {
       ...columns,
       columns: {
         ...columns.columns,
         [newStart.id]: newStart,
-        [newFinish.id]: newFinish,
-      },
-    };
-    setColumns(newColumns);
+        [newFinish.id]: newFinish
+      }
+    }
+
+    setColumns(newState)
   };
 
   return (
-    <div className="w-screen h-screen bg-blue-400">
+    <div className="w-screen h-screen bg-blue-400 p-5">
+      <div className="flex items-center justify-between px-2 pb-5">
+        <div className="text-2xl text-white font-bold">Trello Board</div>
+      </div>
       <DragDropContext onDragEnd={onDragEnd} >
-        <div className="flex">
-          {
-            columns.columnOrder.map((columnID: string) => {
-              const column: ColumnType = columns.columns[columnID];
-              const tasks = column.taskIds.map((taskId: string) => columns.tasks[taskId]);
-              return mounted ? <Column key={column.id} column={column} tasks={tasks} /> : <></>;
-            })
-          }
-        </div>
+        <Droppable droppableId='all-columns' direction='horizontal' type='column'>
+          {(provided) => (
+            <div className="flex" {...provided.droppableProps} ref={provided.innerRef}>
+              {columns.columnOrder.map((id, index) => {
+                const column = columns.columns[id]
+                const tasks = column.taskIds.map(taskId => columns.tasks[taskId])
+                return mounted ? <Column key={column.id} column={column} tasks={tasks} index={index} /> : <></>;
+              })}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
       </DragDropContext>
     </div>
   )
